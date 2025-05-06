@@ -1,4 +1,4 @@
-const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, handleSubmit }) => {
+const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, handleSubmit, handleDelete }) => {
     return (
       <form onSubmit={handleSubmit}>
         <div>
