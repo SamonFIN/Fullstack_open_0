@@ -78,6 +78,10 @@ const App = () => {
               updateAddNew(updatedPersons)
               showNotification(`Updated ${returnedPerson.name}`, 'success')
           })
+          .catch(error => {
+            const errorMessage = error.response?.data?.error || 'Failed to update person'
+            showNotification(errorMessage, 'error')
+          })
         }
         return
     }
