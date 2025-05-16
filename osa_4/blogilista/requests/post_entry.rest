@@ -1,0 +1,9 @@
+POST  http://localhost:3003/api/blogs
+Content-Type: application/json
+
+  {
+    "title": "Introduction to MongoDB Aggregation",
+    "author": "Kristina Chodorow",
+    "url": "https://blog.example.com/mongodb-aggregation",
+    "likes": 50
+  }
