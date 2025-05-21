@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node --watch index.js",
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development node --watch index.js",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
-    "test": "node --test",
+    "test": "cross-env NODE_ENV=test node --test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -14,8 +14,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
+    "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
     "lodash": "^4.17.21",
     "mongoose": "^8.14.3"
   },
@@ -23,6 +26,7 @@
     "@eslint/js": "^9.26.0",
     "@stylistic/eslint-plugin-js": "^4.2.0",
     "eslint": "^9.26.0",
-    "globals": "^16.1.0"
+    "globals": "^16.1.0",
+    "supertest": "^7.1.1"
   }
 }
