@@ -1,4 +1,26 @@
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
+const initialUsers = [
+  {
+    username: 'root',
+    name: 'admin',
+    password: 'Sekret123!'
+  },
+  {
+    username: 'testuser1',
+    name: 'Test User 1',
+    password: '!Password1',
+  },
+  {
+    username: 'testuser2',
+    name: 'Test User 2',
+    password: '!Password2',
+  }
+]
 
 const validBlog = {
   _id: '5a422ba71b54a676234d17fc',
@@ -23,46 +45,73 @@ const invalidBlogNoUrl = {
 
 const initialBlogs = [
   {
-    _id: '5a422a851b54a676234d17f7',
     title: 'React patterns',
     author: 'Michael Chan',
     url: 'https://reactpatterns.com/',
     likes: 7,
-    __v: 0
   },
   {
-    _id: '5a422aa71b54a676234d17f8',
     title: 'Go To Statement Considered Harmful',
     author: 'Edsger W. Dijkstra',
     url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-    likes: 5,
-    __v: 0
+    likes: 5
   },
   {
-    _id: '5a422b3a1b54a676234d17f9',
     title: 'Canonical string reduction',
     author: 'Edsger W. Dijkstra',
     url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
-    likes: 5,
-    __v: 0
+    likes: 5
   },
   {
-    _id: '5a422b891b54a676234d17fa',
     title: 'First class tests',
     author: 'Robert C. Martin',
     url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
     likes: 3,
-    __v: 0
   },
   {
-    _id: '5a422ba71b54a676234d17fb',
     title: 'TDD harms architecture',
     author: 'Robert C. Martin',
     url: 'http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html',
-    likes: 7,
-    __v: 0
+    likes: 7
   }
 ]
+
+const setupInitialUsersAndTokens = async () => {
+  await User.deleteMany({})
+
+  let users = []
+
+  for (let user of initialUsers) {
+    let passwordHash = await bcrypt.hash(user.password, 10)
+    let newUser = new User({
+      username: user.username,
+      name: user.name,
+      passwordHash
+    })
+    users.push(newUser)
+  }
+  const savedUsers = await User.insertMany(users)
+
+  const tokens = savedUsers.map(user => {
+    const userForToken = { username: user.username, id: user._id }
+    return jwt.sign(userForToken, process.env.SECRET)
+  })
+
+  return { savedUsers, tokens }
+}
+
+const setupInitialBlogs = async (users) => {
+  await Blog.deleteMany({})
+
+  const user = users[0] // Assign all initial blogs to the first user
+
+  const blogsWithUser = initialBlogs.map(blog => ({ ...blog, user: user._id }))
+
+  const savedBlogs = await Blog.insertMany(blogsWithUser)
+
+  user.blogs = savedBlogs.map(b => b._id)
+  await user.save()
+}
 
 const nonExistingId = async () => {
   const blog = new Blog({
@@ -83,11 +132,20 @@ const blogsInDb = async () => {
   return blogs.map(blog => blog.toJSON())
 }
 
+const usersInDb = async () => {
+  const users = await User.find({})
+  return users.map(user => user.toJSON())
+}
+
 module.exports = {
+  initialUsers,
   validBlog,
   invalidBlogNoTitle,
   invalidBlogNoUrl,
   initialBlogs,
+  setupInitialUsersAndTokens,
+  setupInitialBlogs,
   nonExistingId,
-  blogsInDb
+  blogsInDb,
+  usersInDb
 }
